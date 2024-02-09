@@ -1,7 +1,13 @@
 from rest_framework.views import APIView
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework import filters
+
 from profile_api import serializers
+from profile_api import models
+from profile_api import permissions
 
 
 class HelloApiView(APIView):
@@ -33,3 +39,20 @@ class HelloApiView(APIView):
     
     def delete(self, request, pk=None):
         return Response({'method':"DELETE"})
+    
+class HelloViewSet(viewsets.ViewSet):
+
+        def list(self, request):
+            hello_viewset = ['Hello', 'python', 'Django', 'Hi']
+            return Response({"viewset":hello_viewset})
+        
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """Creating and updating profiles"""
+    serializer_class = serializers.UserProfileSerialiser
+    queryset = models.UserProfile.objects.all()
+    #User authentication
+    authentication_classes = (TokenAuthentication,)
+    #User access to a specific functionality 
+    permission_classes = (permissions.UpdateOwnProfile,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'email')
